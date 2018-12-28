@@ -35,5 +35,7 @@ class Sql extends PDO {
 	}
 
 }
-
+/*DAO = Data Access Object
+trabalha com PHP, Orientação a Objeto e Banco de Dados
+Trabalha com o PDO*/
 ?>
