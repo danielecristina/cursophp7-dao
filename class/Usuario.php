@@ -41,13 +41,7 @@ class Usuario {
 
 		$result = $sql->select("SELECT * FROM tb_usuarios WHERE idusuario = :ID", array(":ID"=>$id)); // array(chave, igual valor)
 		if(count($result) > 0){
-			$row = $result[0];
-
-			$this->setIdusuario($row['idusuario']);
-			$this->setDeslogin($row['deslogin']);
-			$this->setDessenha($row['dessenha']);
-			$this->setDtcadastro(new DateTime($row['dtcadastro']));
-			// os de amarelo são do Banco de Dados.
+			$this->setData($result[0]);
 		}
 
 	}
@@ -72,14 +66,47 @@ class Usuario {
 			":LOGIN"=>$login, ":PASSWORD"=>$password));
 
 		if(count($result) > 0){
-			$row = $result[0];
-			$this->setIdusuario($row['idusuario']);
-			$this->setDeslogin($row['deslogin']);
-			$this->setDessenha($row['dessenha']);
-			$this->setDtcadastro(new DateTime($row['dtcadastro']));
+			$this->setData($result[0]);
 		} else {
 			throw new Exception("Login e/ou senha inválidos.");
 		}
+	}
+
+	public function setData($data){
+		// os de amarelo são do Banco de Dados.
+		$this->setIdusuario($data['idusuario']);
+		$this->setDeslogin($data['deslogin']);
+		$this->setDessenha($data['dessenha']);
+		$this->setDtcadastro(new DateTime($data['dtcadastro']));
+	}
+
+	public function insert(){
+		$sql = new Sql();
+		// sp=stored procedure_nome da tabela_o que ela faz
+		// o CALL é uma procedure
+		$result = $sql->select("CALL sp_usuarios_insert(:LOGIN, :PASSWORD)", array(
+			':LOGIN'=>$this->getDeslogin(), 
+			':PASSWORD'=>$this->getDessenha()));
+
+		if(count($result) > 0){
+			$this->setData($result[0]);
+		}
+	}
+
+	public function update($login, $password){
+		$this->setDeslogin($login);
+		$this->setDessenha($password);
+		
+		$sql = new Sql();
+		$sql->query("UPDATE tb_usuarios SET deslogin = :LOGIN, dessenha = :PASSWORD WHERE idusuario = :ID", array(
+			':LOGIN'=>$this->getDeslogin(),
+			':PASSWORD'=>$this->getDessenha(),
+			':ID'=>$this->getIdusuario()));
+	}
+
+	public function __construct($login="", $password=""){
+		$this->setDeslogin($login);
+		$this->setDessenha($password);
 	}
 
 	public function __toString(){
